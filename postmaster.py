@@ -17,10 +17,13 @@ cam= cv2.VideoCapture(2)
 kernelOpen=np.ones((5,5))
 kernelClose=np.ones((20,20))
 
-ser = serial.Serial('/dev/ttyACM0', 9600)
+#ser = serial.Serial('/dev/ttyACM0', 9600)
 #font=cv2.cv.InitFont(cv2.cv.CV_FONT_HERSHEY_SIMPLEX,2,0.5,0,3,1)
 
+stanzen = False
+
 def detect_rectangle_by_color(img, lower_bound, upper_bound, img_original):
+    global stanzen
     mask=cv2.inRange(img, lower_bound,upper_bound)
     #morphology
     #maskOpen=cv2.morphologyEx(mask,cv2.MORPH_OPEN,kernelOpen)
@@ -46,8 +49,9 @@ def detect_rectangle_by_color(img, lower_bound, upper_bound, img_original):
     if max_w >= 450 and max_w <= 525 and max_h >= 300 and max_h <= 355:
         cv2.rectangle(img_original, (max_x, max_y), (max_x + max_w, max_y + max_h), (0,0,255), 2)
         #print("min x: %d" % (max_x))
-        if max_x < 108:
-            ser.write(b'stan000000')
+        if max_x < 116 and not stanzen:
+            #ser.write(b'stan000000')
+            stanzen = True
         return True
     else:
         return False
@@ -65,7 +69,8 @@ while True:
     #convert BGR to HSV
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     if not detect_rectangle_by_color(img_hsv, lower_bound_red, upper_bound_red, img_original):
-        ser.write(b'1r2l128128')
+        #ser.write(b'1r2l128128')
+        stanzen = False
 
     cv2.imshow("cam",img_original)
     cv2.waitKey(10)
